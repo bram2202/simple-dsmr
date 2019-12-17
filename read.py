@@ -8,8 +8,8 @@ import datetime
 import paho.mqtt.client as mqtt
 import ConfigParser
 
-
 print("start")
+debug = 0
 
 # Configs
 Config = ConfigParser.ConfigParser()
@@ -74,7 +74,8 @@ while(1):
             p1_line = p1_str.strip()
             lines.append(p1_line)
             i = i + 1
-            print(p1_line)  # Debug
+            if debug == 1:
+                print(p1_line)  # Debug
         except:
             break
 
@@ -103,15 +104,16 @@ while(1):
                 "[0-9]-[0-9]:24.2.1\([0-9]{1,}(.*)W\)\([0-9]{1,1}(.*)\*m3\)", line).group(2))))
 
     # Debug prints
-    print("---")
-    print(power_consuption)
-    print(power_production)
-    print(total_consuption_low)
-    print(total_consuption_high)
-    print(total_production_low)
-    print(total_consuption_high)
-    print(total_gas)
-    print("---")
+    if debug == 1:
+        print("---")
+        print(power_consuption)
+        print(power_production)
+        print(total_consuption_low)
+        print(total_consuption_high)
+        print(total_production_low)
+        print(total_consuption_high)
+        print(total_gas)
+        print("---")
 
     # Send data over MQTT
     if power_consuption != None:
