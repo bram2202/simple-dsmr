@@ -34,7 +34,7 @@ Copy `config-example.ini` to `config.ini` and fill in the correct data.
 | password| - | user password |
 | topic| dsmr | topic |
 
-## Create Serice
+## Create Service 
 To run the script in the background, and on boot, we need to create a service.
 
 ### Create a service
@@ -64,7 +64,7 @@ WantedBy=multi-user.target
 ```
 (Update path to file if needed)
 
-### Reload the services
+### Reload the service
 
 `sudo systemctl daemon-reload`
 
@@ -72,7 +72,7 @@ WantedBy=multi-user.target
 
 `sudo systemctl enable dsmr.service`
 
-### Start the service 
+### Start the service
 
 `sudo systemctl start dsmr.service`
 
@@ -83,7 +83,7 @@ WantedBy=multi-user.target
 It should show "Active: active (running)"
 
 ## TO-DO's
-- Error handling
+- Error handling (mqtt & serial)
 - Serial port listener (instead of loop) 
 - Adding more DSRM values
 - Use Daemon instead of Service
