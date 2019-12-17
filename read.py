@@ -6,25 +6,33 @@ import serial
 import re
 import datetime
 import paho.mqtt.client as mqtt
+import ConfigParser
+
 
 print("start")
 
-mqtt_client = "p1"
-mqtt_broker_address = "<IP address>"
-mqtt_username = "<username>"
-mqtt_password = "<password>"
+# Configs
+Config = ConfigParser.ConfigParser()
+Config.read("config.ini")
 
+mqtt_client = Config.get('mqtt', 'client')
+mqtt_broker_address = Config.get('mqtt', 'broker')
+mqtt_username = Config.get('mqtt', 'user')
+mqtt_password = Config.get('mqtt', 'password')
+mqtt_topic = Config.get('mqtt','topic')
+
+# Setup Serial
 ser = serial.Serial()
-ser.baudrate = 115200
+ser.baudrate = Config.get('serial', 'baudrate')
+ser.port = Config.get('serial', 'port')
 ser.bytesize = serial.EIGHTBITS
 ser.parity = serial.PARITY_NONE
 ser.stopbits = serial.STOPBITS_ONE
 ser.xonxoff = 0
 ser.rtscts = 0
 ser.timeout = 20
-ser.port = "/dev/ttyUSB0"
 
-# Setup perial
+
 try:
     ser.open()
 except Exception as e:
@@ -37,19 +45,19 @@ try:
     # Set username and password
     client.username_pw_set(mqtt_username, mqtt_password)
     client.connect(mqtt_broker_address)  # Connect to broker
-    client.publish("dsmr/status", "OK")  # Send status msg
+    client.publish(mqtt_topic + "/status", "OK")  # Send status msg
 except Exception as e:
     print(e)
     sys.exit()
 
 while(1):
     # Reading P1
-    power_consuption = None       # 1.7.0 (kW)
-    power_production = None       # 2.7.0 (kW)
-    total_production_low = None   # 2.8.1 (kWh, tariff 1)
-    total_production_high = None  # 2.8.2 (kWh, tariff 2)
-    total_consuption_low = None   # 1.8.1 (kWh, tariff 1)
-    total_consuption_high = None  # 1.8.2 (kWh, tariff 2)
+    power_consuption = None       # 1.7.0  (kW)
+    power_production = None       # 2.7.0  (kW)
+    total_production_low = None   # 2.8.1  (kWh, tariff 1)
+    total_production_high = None  # 2.8.2  (kWh, tariff 2)
+    total_consuption_low = None   # 1.8.1  (kWh, tariff 1)
+    total_consuption_high = None  # 1.8.2  (kWh, tariff 2)
     total_gas = None              # 24.2.1 (m3)
 
     # Read serial
@@ -107,25 +115,25 @@ while(1):
 
     # Send data over MQTT
     if power_consuption != None:
-        client.publish("dsmr/power_consuption", power_consuption)
+        client.publish(mqtt_topic + "/power_consuption", power_consuption)
 
     if power_production != None:
-        client.publish("dsmr/power_production", power_production)
+        client.publish(mqtt_topic + "/power_production", power_production)
 
     if total_consuption_low != None:
-        client.publish("dsmr/total_consuption_low", total_consuption_low)
+        client.publish(mqtt_topic + "/total_consuption_low", total_consuption_low)
 
     if total_consuption_high != None:
-        client.publish("dsmr/total_consuption_high", total_consuption_high)
+        client.publish(mqtt_topic + "/total_consuption_high", total_consuption_high)
 
     if total_production_low != None:
-        client.publish("dsmr/total_production_low", total_production_low)
+        client.publish(mqtt_topic + "/total_production_low", total_production_low)
 
     if total_consuption_high != None:
-        client.publish("dsmr/total_consuption_high", total_consuption_high)
+        client.publish(mqtt_topic + "/total_consuption_high", total_consuption_high)
 
     if total_gas != None:
-        client.publish("dsmr/total_gas", total_gas)
+        client.publish(mqtt_topic + "/total_gas", total_gas)
 
 print("end")
 ser.close()
