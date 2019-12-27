@@ -52,12 +52,12 @@ except Exception as e:
 
 while(1):
     # Reading P1
-    power_consuption = None       # 1.7.0  (kW)
+    power_consuption = None       # 1.7.0  (kW)    
+    total_consuption_low = None   # 1.8.1  (kWh, tariff 1)
+    total_consuption_high = None  # 1.8.2  (kWh, tariff 2)
     power_production = None       # 2.7.0  (kW)
     total_production_low = None   # 2.8.1  (kWh, tariff 1)
     total_production_high = None  # 2.8.2  (kWh, tariff 2)
-    total_consuption_low = None   # 1.8.1  (kWh, tariff 1)
-    total_consuption_high = None  # 1.8.2  (kWh, tariff 2)
     total_gas = None              # 24.2.1 (m3)
 
     # Read serial
@@ -91,7 +91,7 @@ while(1):
             total_production_low = float("{0:.2f}".format(
                 float(re.search("[0-9]-[0-9]:2.8.1\([0]{1,}(.*)\*kWh\)", line).group(1))))
         elif ":2.8.2(" in line:
-            total_consuption_high = float("{0:.2f}".format(
+            total_production_high = float("{0:.2f}".format(
                 float(re.search("[0-9]-[0-9]:2.8.2\([0]{1,}(.*)\*kWh\)", line).group(1))))
         elif ":1.7.0" in line:
             power_consuption = float("{0:.3f}".format(
@@ -111,7 +111,7 @@ while(1):
         print(total_consuption_low)
         print(total_consuption_high)
         print(total_production_low)
-        print(total_consuption_high)
+        print(total_production_high)
         print(total_gas)
         print("---")
 
@@ -131,8 +131,8 @@ while(1):
     if total_production_low != None:
         client.publish(mqtt_topic + "/total_production_low", total_production_low)
 
-    if total_consuption_high != None:
-        client.publish(mqtt_topic + "/total_consuption_high", total_consuption_high)
+    if total_production_high != None:
+        client.publish(mqtt_topic + "/total_production_high", total_production_high)
 
     if total_gas != None:
         client.publish(mqtt_topic + "/total_gas", total_gas)
