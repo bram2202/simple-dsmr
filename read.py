@@ -52,6 +52,7 @@ except Exception as e:
 
 while(1):
     # Reading P1
+    power_tariff = None           # 96.14.0
     power_consuption = None       # 1.7.0  (kW)    
     total_consuption_low = None   # 1.8.1  (kWh, tariff 1)
     total_consuption_high = None  # 1.8.2  (kWh, tariff 2)
@@ -81,6 +82,8 @@ while(1):
 
     # Parse line to useble values
     for ii, line in enumerate(lines[:]):
+        if ":96.14.0(" in line:  #0-0:96.14.0(0001)
+            power_tariff = int(re.search("[0-9]-[0-9]:96.14.0\([0]{3,}(.*)\)", line).group(1))
         if ":1.8.1(" in line:
             total_consuption_low = float("{0:.2f}".format(
                 float(re.search("[0-9]-[0-9]:1.8.1\([0]{1,}(.*)\*kWh\)", line).group(1))))
@@ -94,18 +97,19 @@ while(1):
             total_production_high = float("{0:.2f}".format(
                 float(re.search("[0-9]-[0-9]:2.8.2\([0]{1,}(.*)\*kWh\)", line).group(1))))
         elif ":1.7.0" in line:
-            power_consuption = float("{0:.3f}".format(
+            power_consuption = float("{0:.2f}".format(
                 float(re.search("[0-9]-[0-9]:1.7.0\([0]{1,}(.*)\*kW\)", line).group(1))))
         elif ":2.7.0" in line:
-            power_production = float("{0:.3f}".format(
+            power_production = float("{0:.2f}".format(
                 float(re.search("[0-9]-[0-9]:2.7.0\([0]{1,}(.*)\*kW\)", line).group(1))))
         elif ":24.2.1" in line:
-            total_gas = float("{0:.3f}".format(float(re.search(
+            total_gas = float("{0:.2f}".format(float(re.search(
                 "[0-9]-[0-9]:24.2.1\([0-9]{1,}(.*)W\)\([0-9]{1,1}(.*)\*m3\)", line).group(2))))
 
     # Debug prints
     if debug == 1:
         print("---")
+        print(power_tariff)
         print(power_consuption)
         print(power_production)
         print(total_consuption_low)
@@ -116,6 +120,9 @@ while(1):
         print("---")
 
     # Send data over MQTT
+    if power_tariff != None:
+        client.publish(mqtt_topic + "/power_tariff", power_tariff)
+
     if power_consuption != None:
         client.publish(mqtt_topic + "/power_consuption", power_consuption)
 
